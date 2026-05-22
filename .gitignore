@@ -47,3 +47,6 @@ yarn-error.log*
 next-env.d.ts
 
 /src/generated/prisma
+
+# Large media files
+/public/assets/asl-interpreter.mp4

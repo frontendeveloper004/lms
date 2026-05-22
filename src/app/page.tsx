@@ -99,7 +99,7 @@ const testimonials = [
   {
     name: "Jasur Toshmatov",
     role: "Frontend Developer",
-    text: "i.Dargoh orqali 3 oyda React ni o'rgandim va ish topdim. Kurslar juda tushunarli va amaliy.",
+    text: "Ai.Dargoh orqali 3 oyda React ni o'rgandim va ish topdim. Kurslar juda tushunarli va amaliy.",
     avatar: "J",
     color: "bg-green-500",
   },
@@ -143,7 +143,7 @@ export default function Home() {
               Kelajakni{" "}
               <span className="relative inline-block">
                 <span className="bg-gradient-to-r from-green-600 to-green-500 bg-clip-text text-transparent">
-                  i.Dargoh
+                  Ai.Dargoh
                 </span>
                 <svg className="absolute -bottom-2 left-0 w-full" viewBox="0 0 300 12" fill="none">
                   <path d="M2 9 Q75 2 150 8 Q225 14 298 6" stroke="url(#u)" strokeWidth="3" strokeLinecap="round"/>
@@ -218,7 +218,7 @@ export default function Home() {
       <section className="w-full py-24 bg-white">
         <div className="container px-4 md:px-6">
           <div className="text-center mb-14 space-y-3">
-            <p className="text-[11px] font-black text-green-600 uppercase tracking-[0.3em]">Nima uchun i.Dargoh?</p>
+            <p className="text-[11px] font-black text-green-600 uppercase tracking-[0.3em]">Nima uchun Ai.Dargoh?</p>
             <h2 className="text-3xl font-black tracking-tight md:text-4xl text-slate-900">
               O'rganish hech qachon bu qadar <span className="text-green-600">oson</span> bo'lmagan
             </h2>
@@ -329,7 +329,7 @@ export default function Home() {
                 </h2>
                 <p className="text-white/75 font-medium leading-relaxed max-w-lg mx-auto lg:mx-0">
                   O'z kurslaringizni yarating, minglab talabalar bilan ulashing va daromad oling.
-                  i.Dargoh bilan o'qituvchilik yangi bosqichga chiqadi.
+                  Ai.Dargoh bilan o'qituvchilik yangi bosqichga chiqadi.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <Button size="lg" className="h-13 px-8 text-sm font-black rounded-2xl bg-white text-green-700 hover:bg-slate-50 shadow-xl hover:scale-105 transition-all gap-2" asChild>

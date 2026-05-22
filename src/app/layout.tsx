@@ -11,7 +11,7 @@ import { FooterWrapper } from "@/components/footer-wrapper";
 const inter = Inter({ subsets: ["latin", "cyrillic"] });
 
 export const metadata: Metadata = {
-  title: "i.Dargoh - Zamonaviy Ta'lim Platformasi",
+  title: "Ai.Dargoh - Zamonaviy Ta'lim Platformasi",
   description: "Dasturlash, dizayn va boshqa zamonaviy kasblarni biz bilan o'rganing.",
 };
 

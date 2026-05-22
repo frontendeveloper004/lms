@@ -30,7 +30,6 @@ export default function RegisterPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Xatolik yuz berdi");
 
-      // Role bo'yicha o'z paneliga yo'naltirish
       const dashboardMap: Record<string, string> = {
         ADMIN: "/admin",
         TEACHER: "/teacher",
@@ -46,42 +45,29 @@ export default function RegisterPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-[#eef2ff] flex flex-col lg:flex-row overflow-x-hidden">
+    <div
+      className="min-h-screen w-full flex items-center justify-end overflow-x-hidden relative"
+      style={{
+        backgroundImage: "url('/assets/fon.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        backgroundRepeat: "no-repeat",
+      }}
+    >
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-black/30" />
 
-      {/* ── LEFT: Illustration ── */}
-      <div className="hidden lg:flex lg:w-1/2 items-center justify-center p-12 flex-col gap-8 sticky top-0 h-screen">
-        <img
-          src="/register.svg"
-          alt="Register illustration"
-          className="w-full max-w-md object-contain"
-          width={500}
-          height={500}
-        />
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-black text-slate-800 tracking-tight">
-            Bugun boshlang, ertaga yetakchi bo'ling
-          </h2>
-          <p className="text-slate-500 text-sm font-medium">
-            Bepul ro'yxatdan o'ting va 200+ kursga kirish imkoniga ega bo'ling
-          </p>
-        </div>
-      </div>
-
-      {/* ── RIGHT: Form ── */}
-      <div className="flex-1 bg-white flex flex-col items-center justify-center px-6 py-12 lg:py-8 relative overflow-y-auto">
-        <div className="w-full max-w-sm space-y-6 animate-in fade-in zoom-in-95 duration-500">
+      {/* ── RIGHT: Form card ── */}
+      <div
+        className="relative z-10 flex flex-col items-center justify-center px-6 py-12 lg:mr-16 xl:mr-24"
+        style={{ width: "560px", maxWidth: "90vw" }}
+      >
+        <div className="w-full bg-white rounded-3xl shadow-2xl px-10 py-10 space-y-6 animate-in fade-in zoom-in-95 duration-500">
 
           {/* Logo */}
-          <div className="flex flex-col items-center gap-3">
-            <div className="w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 flex items-center justify-center shadow-sm">
-              <img src="/logo.png" alt="i.Dargoh" className="w-9 h-9 object-contain" />
-            </div>
-            <div className="text-center">
-              <h1 className="text-2xl font-black text-slate-900 tracking-tight">
-                i.<span className="text-green-600">Dargoh</span>
-              </h1>
-              <p className="text-slate-400 text-xs font-medium mt-0.5">Yangi hisob yarating</p>
-            </div>
+          <div className="flex flex-col items-center gap-2">
+            <img src="/logo.png" alt="Ai.Dargoh" className="h-10 object-contain" />
+            <p className="text-slate-400 text-xs font-medium mt-0.5">Yangi hisob yarating</p>
           </div>
 
           {/* Form */}
@@ -166,7 +152,9 @@ export default function RegisterPage() {
                     <option value="ENGLISH">Ingliz tili</option>
                   </select>
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
                   </div>
                 </div>
               </div>

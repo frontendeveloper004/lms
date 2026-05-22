@@ -115,7 +115,7 @@ export default async function CertificatePage({ params }: PageProps) {
               </div>
               <div>
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Platforma</p>
-                <p className="text-xs font-black text-slate-700" style={{ fontFamily: "cursive" }}>i.Dargoh</p>
+                <p className="text-xs font-black text-slate-700" style={{ fontFamily: "cursive" }}>Ai.Dargoh</p>
               </div>
               <div>
                 <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Sana</p>
@@ -307,7 +307,7 @@ export default async function CertificatePage({ params }: PageProps) {
 
               {/* Right: Signature */}
               <div style={{ textAlign: "right", display: "flex", flexDirection: "column", gap: "8px" }}>
-                <div style={{ fontSize: "40px", fontWeight: 900, color: "#16a34a", fontFamily: "cursive" }}>i.Dargoh</div>
+                <div style={{ fontSize: "40px", fontWeight: 900, color: "#16a34a", fontFamily: "cursive" }}>Ai.Dargoh</div>
                 <div style={{ width: "180px", height: "2px", backgroundColor: "#cbd5e1", marginLeft: "auto" }} />
                 <div>
                   <p style={{ fontWeight: 900, fontSize: "15px", color: "#1e3a8a", textTransform: "uppercase", letterSpacing: "0.08em", margin: 0 }}>

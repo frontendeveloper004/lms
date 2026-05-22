@@ -106,7 +106,7 @@ export function Footer() {
         {/* Copyright */}
         <div className="border-t border-slate-100 mt-12 pt-8">
           <p className="text-xs text-slate-400 font-medium text-center md:text-left">
-            © 2026 i.Dargoh. Barcha huquqlar himoyalangan.
+            © 2026 Ai.Dargoh. Barcha huquqlar himoyalangan.
           </p>
         </div>
       </div>

@@ -12,10 +12,7 @@ import {
   Sparkles, BrainCircuit, Expand, Hand
 } from "lucide-react";
 import confetti from "canvas-confetti";
-import { AnimatePresence } from "framer-motion";
-import { ASLPlayer } from "@/components/student/ASLPlayer";
-import { SignAvatar } from "@/components/student/SignAvatar";
-import type { TimedSign } from "@/lib/asl-service";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface Lesson {
   id: string; title: string; videoUrl: string | null;
@@ -43,12 +40,12 @@ export default function LessonPlayerPage() {
 
   // --- ASL State ---
   const [isASLMode, setIsASLMode] = useState(false);
-  const [aslSigns, setAslSigns] = useState<TimedSign[]>([]);
   const [isLoadingASL, setIsLoadingASL] = useState(false);
   const [aslError, setAslError] = useState<string | null>(null);
-  const [aslServiceDown, setAslServiceDown] = useState(false);
   const [isPlayerFullscreen, setIsPlayerFullscreen] = useState(false);
   const [videoTime, setVideoTime] = useState(0);
+  const aslVideoRef = React.useRef<HTMLVideoElement>(null);
+  const isASLModeRef = React.useRef(false);
 
   const playerContainerRef = React.useRef<HTMLDivElement>(null);
   const ytPlayerRef = React.useRef<any>(null);
@@ -181,36 +178,31 @@ export default function LessonPlayerPage() {
   };
 
   // ── ASL Logic ──
-  const handleToggleASLMode = async () => {
+  const handleToggleASLMode = () => {
     if (!currentLesson) return;
-
     const newMode = !isASLMode;
     setIsASLMode(newMode);
+    isASLModeRef.current = newMode;
     setAslError(null);
 
-    // Only fetch if turning ON and we don't have signs yet
-    if (newMode && aslSigns.length === 0) {
+    if (newMode) {
       setIsLoadingASL(true);
-      try {
-        const res = await fetch("/api/asl/process", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            videoUrl: currentLesson.videoUrl ?? null,
-            lessonText: currentLesson.content ?? null,
-            lessonTitle: currentLesson.title,
-          }),
-        });
-        if (!res.ok) throw new Error("Server error");
-        const data = await res.json();
-        setAslServiceDown(data.serviceDown ?? false);
-        setAslSigns(data.signs ?? []);
-      } catch (err) {
-        console.error("[ASL]", err);
-        setAslError("ASL yuklanmadi. Qaytadan urinib ko'ring.");
-        setIsASLMode(false);
-      } finally {
+      setTimeout(() => {
         setIsLoadingASL(false);
+        const asl = aslVideoRef.current;
+        if (!asl) return;
+        asl.currentTime = 0;
+        // Only autoplay if lesson video is currently playing
+        const yt = ytPlayerRef.current;
+        const YT = (window as any).YT;
+        const isPlaying = yt && typeof yt.getPlayerState === 'function'
+          && yt.getPlayerState() === YT?.PlayerState?.PLAYING;
+        if (isPlaying) asl.play().catch(() => {});
+      }, 1200);
+    } else {
+      if (aslVideoRef.current) {
+        aslVideoRef.current.pause();
+        aslVideoRef.current.currentTime = 0;
       }
     }
   };
@@ -245,7 +237,23 @@ export default function LessonPlayerPage() {
       if ((window as any).YT && (window as any).YT.Player) {
         if (!ytPlayerRef.current) {
           try {
-            ytPlayerRef.current = new (window as any).YT.Player('youtube-player');
+            ytPlayerRef.current = new (window as any).YT.Player('youtube-player', {
+              events: {
+                onStateChange: (event: any) => {
+                  const YT = (window as any).YT;
+                  const asl = aslVideoRef.current;
+                  if (!asl || !isASLModeRef.current) return;
+                  if (event.data === YT.PlayerState.PLAYING) {
+                    asl.play().catch(() => {});
+                  } else if (event.data === YT.PlayerState.PAUSED) {
+                    asl.pause();
+                  } else if (event.data === YT.PlayerState.ENDED) {
+                    asl.pause();
+                    asl.currentTime = 0;
+                  }
+                },
+              },
+            });
           } catch(e) {
             console.error("YT Player init error:", e);
           }
@@ -268,6 +276,20 @@ export default function LessonPlayerPage() {
         try {
           const time = ytPlayerRef.current.getCurrentTime();
           if (typeof time === 'number') setVideoTime(time);
+          // Backup sync: poll-based state check
+          const asl = aslVideoRef.current;
+          if (asl && isASLModeRef.current) {
+            const YT = (window as any).YT;
+            const state = ytPlayerRef.current.getPlayerState?.();
+            if (state === YT?.PlayerState?.PLAYING && asl.paused) {
+              asl.play().catch(() => {});
+            } else if (state === YT?.PlayerState?.PAUSED && !asl.paused) {
+              asl.pause();
+            } else if (state === YT?.PlayerState?.ENDED) {
+              asl.pause();
+              asl.currentTime = 0;
+            }
+          }
         } catch (e) {}
       } else if (!ytPlayerRef.current && (window as any).YT) {
         initYT();
@@ -277,16 +299,7 @@ export default function LessonPlayerPage() {
     return () => clearInterval(pollTimer);
   }, [isYoutube, embedUrl]);
 
-  // (ASLPlayer handles its own active sign computation internally)
-
-  // Active gloss for SignAvatar — current sign at videoTime
-  const activeGloss = useMemo(() => {
-    if (!isASLMode || !aslSigns.length) return undefined;
-    const sign = aslSigns.find((s) => videoTime >= s.start && videoTime < s.end);
-    if (sign) return sign.gloss;
-    const passed = aslSigns.filter((s) => s.end <= videoTime);
-    return passed.length > 0 ? passed[passed.length - 1].gloss : aslSigns[0]?.gloss;
-  }, [isASLMode, aslSigns, videoTime]);
+  // (ASL video driven by aslVideoRef + YouTube player events)
 
   // ── Sidebar ──────────────────────────────────────────────────
   const Sidebar = ({ mobile = false }: { mobile?: boolean }) => {
@@ -606,14 +619,72 @@ export default function LessonPlayerPage() {
               <Expand className="w-5 h-5" />
             </button>
 
-            {/* ASL Avatar overlay — full body, synced with video */}
-            <SignAvatar
-              currentGloss={activeGloss}
-              isVisible={isASLMode}
-              isLoading={isLoadingASL}
-              isActive={isASLMode && !isLoadingASL}
-              videoTime={videoTime}
-            />
+            {/* ASL Interpreter video overlay — bottom-left, synced with lesson */}
+            <AnimatePresence>
+              {isASLMode && (
+                <motion.div
+                  initial={{ opacity: 0, x: -30, scale: 0.92 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  exit={{ opacity: 0, x: -30, scale: 0.92 }}
+                  transition={{ type: "spring", damping: 22, stiffness: 180 }}
+                  className="absolute bottom-4 left-4 z-[9999] pointer-events-none select-none"
+                  style={{
+                    width: isPlayerFullscreen ? 280 : 200,
+                    borderRadius: 18,
+                    overflow: "hidden",
+                    boxShadow: isPlayerFullscreen
+                      ? "0 12px 60px rgba(0,0,0,0.7), 0 0 0 2px rgba(255,255,255,0.12)"
+                      : "0 8px 32px rgba(0,0,0,0.6), 0 0 0 1.5px rgba(255,255,255,0.10)",
+                    transition: "width 0.35s cubic-bezier(.4,0,.2,1)",
+                  }}
+                >
+                  {/* Inner border glow */}
+                  <div className="absolute inset-0 pointer-events-none z-20"
+                    style={{ borderRadius: 18, boxShadow: "inset 0 0 0 1.5px rgba(255,255,255,0.13)" }} />
+
+                  {/* Loading overlay */}
+                  {isLoadingASL && (
+                    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-slate-900/90 backdrop-blur-sm"
+                      style={{ borderRadius: 18 }}>
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="w-7 h-7 border-2 border-blue-400 border-t-transparent rounded-full"
+                      />
+                      <p className="text-[9px] font-bold text-blue-300 uppercase tracking-widest">
+                        Tayyorlanmoqda...
+                      </p>
+                    </div>
+                  )}
+
+                  {/* ASL interpreter video */}
+                  <video
+                    ref={aslVideoRef}
+                    src="/assets/asl-interpreter.mp4"
+                    playsInline
+                    className="w-full block"
+                    style={{ display: "block", background: "#000" }}
+                  />
+
+                  {/* Bottom label */}
+                  <div
+                    className="absolute bottom-0 left-0 right-0 flex items-center justify-between"
+                    style={{
+                      padding: isPlayerFullscreen ? "10px 14px" : "7px 10px",
+                      background: "linear-gradient(to top, rgba(0,0,0,0.85) 60%, transparent)",
+                    }}
+                  >
+                    <span className="font-black text-white uppercase tracking-widest"
+                      style={{ fontSize: isPlayerFullscreen ? 10 : 8 }}>ASL</span>
+                    <div className="flex items-center gap-1.5">
+                      <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="font-black text-emerald-300 uppercase tracking-widest"
+                        style={{ fontSize: isPlayerFullscreen ? 9 : 7 }}>LIVE</span>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
 
             {/* ASL error toast */}
             {aslError && (
