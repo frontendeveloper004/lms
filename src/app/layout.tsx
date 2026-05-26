@@ -13,6 +13,10 @@ const inter = Inter({ subsets: ["latin", "cyrillic"] });
 export const metadata: Metadata = {
   title: "Ai.Dargoh - Zamonaviy Ta'lim Platformasi",
   description: "Dasturlash, dizayn va boshqa zamonaviy kasblarni biz bilan o'rganing.",
+  icons: {
+    icon: "/ai.png",
+    apple: "/ai.png",
+  },
 };
 
 export default function RootLayout({

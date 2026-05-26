@@ -182,7 +182,7 @@ export default function OnboardingClient() {
               className="h-full bg-gradient-to-r from-blue-500 to-blue-400 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${progress}%` }}
-              transition={{ duration: 0.4, ease: "easeOut" }}
+              transition={{ duration: 0.4, ease: "easeOut" as const }}
             />
           </div>
         </div>
@@ -200,7 +200,7 @@ export default function OnboardingClient() {
                 initial={{ opacity: 0, x: 40 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -40 }}
-                transition={{ duration: 0.28, ease: "easeOut" }}
+                transition={{ duration: 0.28, ease: "easeOut" as const }}
               >
                 <div className="mb-7">
                   <div className="text-4xl mb-4">{question.emoji}</div>
