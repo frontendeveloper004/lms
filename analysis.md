@@ -1,4 +1,4 @@
-# LMS-UZ Loyihasi — Chuqur Tahlil
+# LMS-UZ Loyihasi
 
 > **Tahlil sanasi:** 25-May 2026  
 > **Loyiha nomi:** lms-uz (Ai.Dargoh LMS)  
@@ -583,4 +583,4 @@ Bu loyiha solo yoki kichik jamoa uchun juda katta va yaxshi amalga oshirilgan. A
 
 ---
 
-*Tahlil Kiro AI tomonidan tayyorlandi — 25-May 2026*
+*Tahlil 25-May 2026 da tayyorlandi*
