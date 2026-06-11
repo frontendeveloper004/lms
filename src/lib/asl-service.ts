@@ -19,7 +19,7 @@ import { getASLClipUrl, extractYouTubeId } from "./asl-client-utils";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
-export type SignType = "clip" | "fingerspell" | "pause";
+export type SignType = "clip" | "fingerspell" | "pause" | "pose";
 
 export interface TimedSign {
   /** Start time in seconds (relative to video) */
