@@ -3,15 +3,11 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 // Role: "ADMIN" | "TEACHER" | "STUDENT"
-// NotificationType: "ASSIGNMENT_SUBMITTED" | "ASSIGNMENT_GRADED" | "COURSE_COMPLETED" | "COMMENT_REPLY" | "COMMENT_MENTION" | "COMMENT_LIKED"
-// CourseLevel: "BEGINNER" | "INTERMEDIATE" | "ADVANCED"
-// CourseStatus: "PENDING" | "APPROVED" | "REJECTED"
-
 model User {
   id           String   @id @default(cuid())
   name         String
@@ -25,22 +21,27 @@ model User {
   updatedAt     DateTime @updatedAt
   claimedBadges String   @default("[]")
   tokenVersion  Int      @default(0)
-
-  // Profile upgrade fields
   bio            String?
   specialization String?
   linkedinUrl    String?
   githubUrl      String?
-
-  // Extended teacher profile fields
   coverPhoto     String?
   youtubeUrl     String?
   telegramUrl    String?
   websiteUrl     String?
   skills         String?
-  // Student profile fields
   location       String?
   goal           String?
+  onboardingCompleted Boolean @default(false)
+  weeklyXp        Int      @default(0)
+  seasonalXp      Int      @default(0)
+  lastWeeklyReset DateTime?
+  lastMonthlyReset DateTime?
+  league          String   @default("BRONZA")
+  streak          Int      @default(0)
+  lastActiveAt    DateTime?
+  highestLeague   String?   @default("BRONZA")
+  pointsToNextLeague Int    @default(500)
 
   taughtCourses Course[] @relation("TeacherCourses")
   teacherProjects     TeacherProject[]
@@ -58,20 +59,6 @@ model User {
   receivedMessages      Message[]      @relation("ReceivedMessages")
   onlineStatus          UserOnlineStatus?
   englishProfile        EnglishTeacherProfile?
-
-  // Onboarding
-  onboardingCompleted Boolean @default(false)
-
-  // Ranking & Gamification
-  weeklyXp        Int      @default(0)
-  seasonalXp      Int      @default(0)
-  lastWeeklyReset DateTime?
-  lastMonthlyReset DateTime?
-  league          String   @default("BRONZA") // BRONZA, KUMUSH, OLTIN, PLATINA, ALMOS
-  streak          Int      @default(0)
-  lastActiveAt    DateTime?
-  highestLeague   String?   @default("BRONZA")
-  pointsToNextLeague Int    @default(500)
   seasonWinners   SeasonWinner[]
   challengeProgress UserChallengeProgress[]
 
@@ -83,11 +70,10 @@ model EnglishTeacherProfile {
   id                 String   @id @default(cuid())
   userId             String   @unique
   user               User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   teachingExperience String?
   languages          String?
   availability       String?
-  lessonFormat       String?   // "Online", "Offline", "Both"
+  lessonFormat       String?
   universityDegree   String?
   teachingMaterials  String?
   studentResults     String?
@@ -96,7 +82,6 @@ model EnglishTeacherProfile {
   hasTesolTefl       Boolean  @default(false)
   hasTrialLesson     Boolean  @default(false)
   whatsappUrl        String?
-  
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }
@@ -122,15 +107,11 @@ model Course {
   status      String       @default("PENDING")
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
-
   categoryId  String
   category    Category     @relation(fields: [categoryId], references: [id])
-
   teacherId   String
   teacher     User         @relation("TeacherCourses", fields: [teacherId], references: [id])
-
   commentsEnabled Boolean @default(true)
-
   modules     Module[]
   enrollments Enrollment[]
   certificates Certificate[]
@@ -148,10 +129,8 @@ model Module {
   title       String
   orderIdx    Int
   createdAt   DateTime @default(now())
-  
   courseId    String
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
   lessons     Lesson[]
   quizzes     Quiz[]
   assignment  Assignment?
@@ -168,7 +147,6 @@ model Lesson {
   attachmentUrl String?
   orderIdx      Int
   createdAt     DateTime @default(now())
-
   moduleId    String
   module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
   completedBy CompletedLesson[]
@@ -181,10 +159,8 @@ model Quiz {
   id          String   @id @default(cuid())
   title       String
   orderIdx    Int
-
   moduleId    String
   module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-
   questions   Question[]
   completedBy CompletedQuiz[]
 
@@ -196,7 +172,6 @@ model Question {
   text        String
   options     String
   correctIdx  Int
-
   quizId      String
   quiz        Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
@@ -208,10 +183,8 @@ model Enrollment {
   progress    Float    @default(0)
   completedAt DateTime?
   createdAt   DateTime @default(now())
-
   studentId   String
   student     User     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
   courseId    String
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
@@ -226,7 +199,6 @@ model CompletedLesson {
   userId    String
   lessonId  String
   createdAt DateTime @default(now())
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lesson    Lesson   @relation(fields: [lessonId], references: [id], onDelete: Cascade)
 
@@ -241,7 +213,6 @@ model CompletedQuiz {
   quizId    String
   score     Int      @default(0)
   createdAt DateTime @default(now())
-
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   quiz      Quiz     @relation(fields: [quizId], references: [id], onDelete: Cascade)
 
@@ -254,10 +225,8 @@ model Certificate {
   id          String   @id @default(cuid())
   code        String   @unique
   issuedAt    DateTime @default(now())
-  
   userId      String
   user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   courseId    String
   course      Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
@@ -280,10 +249,8 @@ model Assignment {
   aiGradingPrompt  String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
-
   moduleId    String   @unique
   module      Module   @relation(fields: [moduleId], references: [id], onDelete: Cascade)
-
   submissions AssignmentSubmission[]
 }
 
@@ -305,10 +272,8 @@ model AssignmentSubmission {
   aiGradedAt   DateTime?
   aiConfidence Float?
   aiBreakdown   String?
-
   assignmentId String
   assignment   Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-
   studentId    String
   student      User       @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
@@ -328,7 +293,6 @@ model TeacherProject {
   imageUrl    String?
   orderIdx    Int      @default(0)
   createdAt   DateTime @default(now())
-
   teacherId   String
   teacher     User     @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
@@ -343,7 +307,6 @@ model TeacherCertificate {
   imageUrl  String?
   orderIdx  Int      @default(0)
   createdAt DateTime @default(now())
-
   teacherId String
   teacher   User   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
 
@@ -356,10 +319,8 @@ model Notification {
   isRead      Boolean  @default(false)
   referenceId String
   createdAt   DateTime @default(now())
-
   recipientId String
   recipient   User             @relation("ReceivedNotifications", fields: [recipientId], references: [id], onDelete: Cascade)
-
   senderId    String
   sender      User             @relation("SentNotifications", fields: [senderId], references: [id], onDelete: Cascade)
 
@@ -376,17 +337,13 @@ model CourseComment {
   isPinned  Boolean  @default(false)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
   courseId  String
   course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-
   parentId  String?
   parent    CourseComment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
   replies   CourseComment[] @relation("CommentReplies")
-
   likes     CommentLike[]
 
   @@index([courseId])
@@ -398,10 +355,8 @@ model CourseComment {
 model CommentLike {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
-
   userId    String
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   commentId String
   comment   CourseComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
 
@@ -418,10 +373,8 @@ model Message {
   reactions String    @default("{}")
   createdAt DateTime  @default(now())
   updatedAt DateTime?  @updatedAt
-
   senderId   String
   sender     User   @relation("SentMessages", fields: [senderId], references: [id], onDelete: Cascade)
-
   receiverId String
   receiver   User   @relation("ReceivedMessages", fields: [receiverId], references: [id], onDelete: Cascade)
 
@@ -444,23 +397,20 @@ model UserOnlineStatus {
 
 model Season {
   id          String   @id @default(cuid())
-  name        String   // e.g., "May 2026"
+  name        String
   startDate   DateTime
   endDate     DateTime
   isActive    Boolean  @default(true)
   createdAt   DateTime @default(now())
-  
   winners     SeasonWinner[]
 }
 
 model SeasonWinner {
   id        String   @id @default(cuid())
-  rank      Int      // 1, 2, 3
+  rank      Int
   xpPoints  Int
-  
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
   seasonId  String
   season    Season   @relation(fields: [seasonId], references: [id], onDelete: Cascade)
 
@@ -474,12 +424,11 @@ model WeeklyChallenge {
   title       String
   description String
   rewardXp    Int
-  targetType  String   // "LESSONS", "QUIZZES", "SCORE", "XP"
+  targetType  String
   targetCount Int
   startsAt    DateTime
   endsAt      DateTime
   createdAt   DateTime @default(now())
-
   userProgress UserChallengeProgress[]
 }
 
@@ -490,7 +439,6 @@ model UserChallengeProgress {
   currentCount Int      @default(0)
   isCompleted  Boolean  @default(false)
   updatedAt    DateTime @updatedAt
-
   user        User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   challenge   WeeklyChallenge @relation(fields: [challengeId], references: [id], onDelete: Cascade)
 

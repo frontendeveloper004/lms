@@ -5,9 +5,15 @@ WORKDIR /app
 COPY package.json ./
 COPY prisma ./prisma/
 
+# Use production schema (postgresql)
+RUN cp prisma/schema.production.prisma prisma/schema.prisma
+
 RUN npm install --legacy-peer-deps
 
 COPY . .
+
+# Keep production schema
+RUN cp prisma/schema.production.prisma prisma/schema.prisma
 
 RUN npx prisma generate
 
