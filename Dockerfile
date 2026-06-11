@@ -19,4 +19,4 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" \
 
 EXPOSE 3000
 
-CMD ["node", "node_modules/.bin/next", "start"]
+CMD ["npm", "start"]
