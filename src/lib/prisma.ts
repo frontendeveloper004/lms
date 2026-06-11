@@ -1,10 +1,4 @@
 import { PrismaClient } from '@prisma/client';
-import { validateEnv } from '@/lib/validations';
-
-// Only validate env at runtime, not during Next.js build
-if (process.env.NODE_ENV !== 'production' || process.env.DATABASE_URL) {
-  validateEnv();
-}
 
 const prismaClientSingleton = () => {
   return new PrismaClient({
