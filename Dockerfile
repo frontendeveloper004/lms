@@ -2,15 +2,17 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Copy package.json AND prisma schema before npm install
+# so that postinstall (prisma generate) can find the schema
 COPY package.json ./
+COPY prisma ./prisma/
+
 RUN npm install --legacy-peer-deps
 
-# Copy source
+# Copy the rest of the source
 COPY . .
 
-# Generate Prisma client and build
-RUN npx prisma generate
+# Build Next.js
 RUN npm run build
 
 EXPOSE 3000
