@@ -17,8 +17,6 @@ RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" \
     UPSTASH_REDIS_REST_TOKEN="dummy-token" \
     npm run build
 
-RUN chmod +x start.sh
-
 EXPOSE 3000
 
-CMD ["sh", "start.sh"]
+CMD ["node", "node_modules/.bin/next", "start"]
