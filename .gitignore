@@ -33,6 +33,9 @@ yarn-error.log*
 # env files (can opt-in for committing if needed)
 .env*
 
+# Let Railway generate its own lock file
+package-lock.json
+
 # SQLite database files (legacy - now using PostgreSQL)
 *.db
 *.db-journal
